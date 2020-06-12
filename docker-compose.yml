@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  gateway:
+    image: nginx:latest
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./volumes/gateway/confs:/etc/nginx/conf.d
+      - ./volumes/front-end/dist:/www/data
+    depends_on:
+      - front-end
+
+  front-end:
+    image: node:latest
+    working_dir: /app
+    command: "sh app-setup.sh"
+    volumes:
+      - ./volumes/front-end:/app

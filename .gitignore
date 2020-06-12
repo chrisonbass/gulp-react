@@ -1,0 +1,2 @@
+volumes/front-end/node_modules
+volumes/front-end/package-lock.json
