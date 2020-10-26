@@ -4,6 +4,7 @@ import browserify from "browserify";
 import babelify from "babelify";
 import source from 'vinyl-source-stream';
 import clean from 'gulp-clean';
+import sass from 'gulp-sass';
 
 /* ====== Moving Static Files ===== */
 var moveStaticFiles =  () => {
@@ -47,7 +48,9 @@ compileJavascript.displayName = "Compiling Javascript";
 
 /* ====== COMPILE SASS SCRIPT ===== */
 var compileSass =  (done) => {
-  done();
+  return gulp.src('./src/sass/style.scss')
+    .pipe(sass.sync().on('error', sass.logError))
+    .pipe(gulp.dest('./dist/css/'));
 };
 compileSass.displayName = "Compiling SASS";
 

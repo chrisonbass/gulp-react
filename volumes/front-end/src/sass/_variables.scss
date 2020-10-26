@@ -1,0 +1,16 @@
+
+/* Grid Variables */
+$gutter: 15px !default;
+
+$screen-break-sm: 576px !default;
+$screen-break-md: 768px !default;
+$screen-break-lg: 992px !default;
+
+$max-width-xs: $screen-break-sm - 1px;
+$max-width-sm: $screen-break-md - 1px;
+$max-width-md: $screen-break-lg - 1px;
+
+$container-width-xs: 540px !default;
+$container-width-sm: 720px !default; 	
+$container-width-md: 960px !default;
+$container-width-lg: 1140px !default; 		

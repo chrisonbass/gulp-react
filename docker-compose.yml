@@ -3,6 +3,7 @@ version: '3.7'
 services:
   gateway:
     image: nginx:latest
+    container_name: gateway
     restart: always
     ports:
       - 8080:80
@@ -14,6 +15,7 @@ services:
 
   front-end:
     image: node:latest
+    container_name: front_end
     working_dir: /app
     command: "sh app-setup.sh"
     volumes:

@@ -1,0 +1,54 @@
+@mixin clearfix {
+  overflow: auto;
+  clear: both;
+
+  &:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+}
+
+@mixin font-arial {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@mixin font-tahoma {
+  font-family: Tahoma, Geneva, sans-serif;
+}
+
+@mixin targetMinSize($min){
+  @media screen and (min-width: $min) {
+    @content
+  }
+}
+
+@mixin targetMaxSize($min){
+   @media screen and (max-width: $min) {
+    @content
+  } 
+}
+
+@mixin screenExtraSmall {
+  @include targetMaxSize($max-width-xs) {
+    @content
+  }
+}
+
+@mixin screenSmall {
+  @include targetMinSize($screen-break-sm){
+    @content
+  }
+}
+
+@mixin screenMedium {
+  @include targetMinSize($screen-break-md){
+    @content
+  }
+}
+
+@mixin screenLarge {
+  @include targetMinSize($screen-break-lg) {
+    @content
+  }
+}
