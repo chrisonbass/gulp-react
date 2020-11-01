@@ -3,13 +3,21 @@ import ReactDOM from 'react-dom'
 import Store from './service/Store';
 
 let AppStore = new Store({
-  name: "Ted"
+  name: "Ted",
+  field: ""
 });
 
 AppStore.registerReducer('name', (action, state = "N/A") => {
   console.log("Reducer");
   if ( action.type === "toggle-name" ){
     return action.name || "N/A";
+  }
+  return state;
+} );
+
+AppStore.registerReducer('field', (action, state = "N/A") => {
+  if ( action.type === "update-field" ){
+    return action.value;
   }
   return state;
 } );
@@ -36,11 +44,25 @@ class MyApp extends React.Component {
     this.unregister();
   }
 
+  noAction(){
+    AppStore.dispatch({
+      type: "no-action",
+      data: { fake: "foo" }
+    });
+  }
+
   toggleName(){
     let name = this.state.name === "Ted" ? "Dale" : "Ted";
     AppStore.dispatch({
       type: "toggle-name",
       name
+    });
+  }
+
+  updateField(e){
+    AppStore.dispatch({
+      type: "update-field",
+      value: e.target.value
     });
   }
 
@@ -51,8 +73,13 @@ class MyApp extends React.Component {
         <div className="container">
           <div className="row">
             <div className="col-xs-12">
+              <input type="text" value={this.state.field} onChange={this.updateField.bind(this)} />
               <button type="button" onClick={this.toggleName.bind(this)}>
                 Toggle 
+              </button>
+              <br />
+              <button type="button" onClick={this.noAction.bind(this)}>
+                No Action 
               </button>
             </div>
           </div>

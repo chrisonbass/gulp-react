@@ -44,6 +44,7 @@ class Store {
       next();
       if ( !isEqual(_state, state) ){
         _state = state;
+        console.log("Making Callbacks");
         self.makeCallbacks();
       }
     };
