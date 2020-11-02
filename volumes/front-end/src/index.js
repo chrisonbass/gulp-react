@@ -1,14 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
 import Store from './service/Store';
+import Router from './comps/Routing/Router';
+import Route from './comps/Routing/Route';
+import Link from './comps/Routing/Link';
 
 let AppStore = new Store({
+  router: {},
   name: "Ted",
   field: ""
 });
 
 AppStore.registerReducer('name', (action, state = "N/A") => {
-  console.log("Reducer");
   if ( action.type === "toggle-name" ){
     return action.name || "N/A";
   }
@@ -23,9 +26,7 @@ AppStore.registerReducer('field', (action, state = "N/A") => {
 } );
 
 AppStore.registerMiddleware((store, action, next) => {
-  console.log("Pre Reducer Middleware");
   let res = next();
-  console.log("Post Reducer Middleware");
   return res;
 } );
 
@@ -116,6 +117,33 @@ class MyApp extends React.Component {
   }
 }
 
+let BaseApp = (
+  <Router store={AppStore}>
+    <div className="container">
+      <ul>
+        <li>
+          <Link to="/home">
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link to="/about">
+            About
+          </Link>
+        </li>
+        <li>
+          <Link to="/contact">
+            Contact
+          </Link>
+        </li>
+      </ul>
+    </div>
+    <Route path="/about" />
+    <Route path="/home" component={MyApp} />
+    <Route path="/contact" />
+  </Router>
+);
+
 window.onpopstate = function(event) {
   console.log("location: " + document.location + ", state: " + JSON.stringify(event.state));
 };
@@ -129,6 +157,6 @@ window.testPush2 = () => {
 };
 
 ReactDOM.render(
-  <MyApp />,
+  BaseApp,
   document.getElementById("app")
 );

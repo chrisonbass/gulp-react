@@ -44,7 +44,6 @@ class Store {
       next();
       if ( !isEqual(_state, state) ){
         _state = state;
-        console.log("Making Callbacks");
         self.makeCallbacks();
       }
     };
@@ -68,6 +67,13 @@ class Store {
       this.reducers[key] = [];
     }
     this.reducers[key].push(callback);
+
+    return () => {
+      let index = this.reducers[key].indexOf(callback);
+      if ( index >= 0 ){
+        this.reducers[key].splice(index, 1);
+      }
+    };
   }
 
   registerMiddleware(callback){

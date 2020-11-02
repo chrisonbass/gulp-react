@@ -1,34 +1,67 @@
 import React from 'react';
-
-const RouterContext = React.createContext({
-  location: {
-    hash: window.location.hash,
-    host: window.location.host,
-    hostname: window.location.hostname,
-    href: window.location.href, 
-    pathname: window.location.pathname,
-    search: window.location.search,
-    port: window.location.port,
-    protocol: window.location.protocol
-  },
-  match: { }
-});
+import RouterContext from './Context';
+import Store from '../../service/Store';
 
 class Router extends React.Component {
   constructor(props){
     super(props);
     this.routes = [];
     this.state = {
+      router: {
+        path: window.location.pathname,
+        search: window.location.search
+      },
       match: {}
     };
+    this.unregister = [];
+    if ( this.props.store && this.props.store instanceof Store ){
+      let deleteCallback = this.props.store.registerReducer("router", (action, state = {}) => {
+        if ( action.type === "@@router/change" ){
+          let newState = {
+            ...state,
+            path: window.location.pathname,
+            search: window.location.search
+          };
+          return newState;
+        }
+        return state;
+      } );
+      let stateUpdateCallback = this.props.store.register(this.storeListener.bind(this));
+      let middleware = this.props.store.registerMiddleware( (store, action, next) => {
+        if ( action.type === "@@router/change" ){
+          window.history.pushState(action.state || {
+            to: action.to || "/"
+          }, action.title || "", action.to || "/");
+        }
+        return next();
+      } );
+      this.unregister.push(deleteCallback);
+      this.unregister.push(stateUpdateCallback);
+    }
   }
 
   componentDidMount(){
     this.checkMatches();
   }
 
+  componentWillUnmount(){
+    this.unregister.forEach( (callback) => {
+      if ( typeof callback === "function" ){
+        callback();
+      }
+    } );
+  }
+
   componentDidUpdate(){
     this.checkMatches();
+  }
+
+  storeListener(state){
+    if ( this.state.router !== state.router ){
+      this.setState({
+        router: state.router
+      });
+    }
   }
 
   registerRoute(route){
@@ -53,8 +86,8 @@ class Router extends React.Component {
       exact: route.props.exact ? true : false,
       params: {}
     };
-    let currentPath = ("" + window.location.pathname).trim().split(/\//);
-    let routePath = ("" + match.path).split(/\//).trim();
+    let currentPath = ("" + window.location.pathname).trim().split(/\//).filter( str => str);
+    let routePath = ("" + match.path).trim().split(/\//).filter( str => str );
     (routePath || []).forEach( (pathPart, index) => {
       if ( index < currentPath.length ){
         if ( pathPart.match(/^:/) ){
@@ -88,7 +121,7 @@ class Router extends React.Component {
         match
       };
     } );
-    if ( JSON.strinfigy(this.state.match) !== JSON.strinfigy(matchFound) ){
+    if ( JSON.stringify(this.state.match) !== JSON.stringify(matchFound) ){
       this.setState({
         match: matchFound
       });
@@ -108,6 +141,15 @@ class Router extends React.Component {
     return can;
   }
 
+  pushState(pathName){
+    if ( this.props.store ){
+      this.props.store.dispatch({
+        type: "@@router/change",
+        to: pathName
+      });
+    }
+  }
+
   getContext(){
     let match = false;
     this.routes.forEach( (entry) => {
@@ -122,19 +164,13 @@ class Router extends React.Component {
       match = {};
     }
     return {
-      registerRoute: this.registerRoute.bind(this),
-      canRender: this.canRender.bind(this),
-      location: {
-        hash: window.location.hash,
-        host: window.location.host,
-        hostname: window.location.hostname,
-        href: window.location.href, 
-        origin: window.location.origin,
-        pathname: window.location.pathname,
-        port: window.location.port,
-        protocol: window.location.protocol
-      },
-      match,
+      router: {
+        registerRoute: this.registerRoute.bind(this),
+        canRender: this.canRender.bind(this),
+        pushState: this.pushState.bind(this),
+        ...this.state.router,
+        match
+      }
     }
   }
 
@@ -142,50 +178,9 @@ class Router extends React.Component {
     return (
       <RouterContext.Provider value={this.getContext()}>
         {this.props.children}
-      </RouterContext>
+      </RouterContext.Provider>
     );
   }
 }
 
-function withRouter( ChildComponent ){
-  return function RouterWrapper(props){
-    return (
-      <RouterContext.Consumer>
-        {(routState) => {
-          return <ChildComponent {...routState} {...props} />;
-        }}
-      </RouterContext.Consumer>
-    );
-  };
-}
-
-class Route extends React.Component {
-  constructor(props){
-    super(props);
-    props.registerRoute(this);
-  }
-
-  render(){
-    if ( this.props.canRender(this) ){
-      if ( this.props.component ){
-        let RouteComponent = this.props.component;
-        let { routState, ...compProps } = this.props;
-        let { registerRoute, canRender, ...compRouteState } = routState;
-        return <RouteComponent {...compRouteState} {...compProps} />;
-      }
-      return (
-        <div>
-          <h1>Route</h1>
-          <pre>Route {JSON.strinfigy(this.props.routState, null, 2)}</pre>
-        </div>
-      );
-    }
-    return null;
-  }
-}
-Route = withRouter(Route);
-
-export withRouter;
-export RouterContext;
-export Router;
-export Route;
+export default Router;
