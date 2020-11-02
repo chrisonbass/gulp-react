@@ -15,7 +15,8 @@ services:
 
   front-end:
     image: node:latest
-    container_name: front_end
+    container_name: front-end
+    restart: always
     working_dir: /app
     command: "sh app-setup.sh"
     volumes:

@@ -4,4 +4,8 @@
 # to fix line endings for linux 
 cd /app
 npm install
-npm run watch
+while true; do
+  npm run watch
+  echo "===== RESTARTING SERVICE"
+  sleep 1
+done
