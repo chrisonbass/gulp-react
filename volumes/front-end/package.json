@@ -22,6 +22,7 @@
     "@babel/register": "^7.10.1",
     "babelify": "^10.0.0",
     "browserify": "^16.5.1",
+    "eslint-plugin-react": "^7.21.5",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
     "gulp-noop": "^1.0.1",
@@ -38,5 +39,27 @@
       "@babel/env",
       "@babel/react"
     ]
+  },
+  "eslintConfig": {
+    "plugins": [
+      "react"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended"
+    ],
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "rules": {
+      "semi": [
+        "error",
+        "always"
+      ],
+      "react/jsx-uses-react": "error",
+      "react/jsx-uses-vars": "error"
+    }
   }
 }
