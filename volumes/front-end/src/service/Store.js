@@ -1,6 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
-import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
+
+const _buildDeleteListener = (list, item) => {
+  return () => {
+    let index = list.indexOf(item);
+    if ( index >= 0 ){
+      list.splice(index, 1);
+    }
+  };
+};
 
 class Store {
   constructor(defState = {}){
@@ -14,7 +22,6 @@ class Store {
       return _state;
     };
 
-
     this.dispatch = (action) => {
       let middlewareIndex = -1;
       let middleware = this.middleware.slice();
@@ -22,15 +29,15 @@ class Store {
       let state = cloneDeep(_state);
       const reduce = (store, action, dispatch) => {
         Object.keys(state).forEach( (key) => {
-          if ( reducers.hasOwnProperty(key) ){
+          if ( key in reducers ){
             reducers[key].forEach( (reducer) => {
               state[key] = reducer(action, state[key]);
             } );
           }
         } );
         return dispatch();
-      }
-      middleware.push(reduce)
+      };
+      middleware.push(reduce);
       const next = () => {
         middlewareIndex++;
         if ( middlewareIndex < middleware.length ){
@@ -53,40 +60,22 @@ class Store {
     if ( this.listeners.indexOf(callback) < 0 ){
       this.listeners.push(callback);
     }
-    let self = this;
-    return () => {
-      let index = self.listeners.indexOf(callback);
-      if ( index >= 0 ){
-        self.listeners.splice(index, 1);
-      }
-    };
+    return _buildDeleteListener(this.listeners, callback);
   }
 
   registerReducer(key, callback){
-    if ( !this.reducers.hasOwnProperty(key) ){
+    if ( !( key in this.reducers ) ){
       this.reducers[key] = [];
     }
     this.reducers[key].push(callback);
-
-    return () => {
-      let index = this.reducers[key].indexOf(callback);
-      if ( index >= 0 ){
-        this.reducers[key].splice(index, 1);
-      }
-    };
+    return _buildDeleteListener(this.reducers, callback);
   }
 
   registerMiddleware(callback){
     if ( this.middleware.indexOf(callback) < 0 ){
       this.middleware.push(callback);
     }
-    let self = this;
-    return () => {
-      let index = self.middleware.indexOf(callback);
-      if ( index >= 0 ){
-        self.middleware.splice(index, 1);
-      }
-    };
+    return _buildDeleteListener(this.middleware, callback);
   }
 
   makeCallbacks(){
