@@ -7,25 +7,20 @@ class Router extends React.Component {
   constructor(props){
     super(props);
     this.routes = [];
-    this.state = {
-      router: {
-        path: window.location.pathname,
-        search: window.location.search
-      },
-      match: {}
-    };
+    this.popStateListener = this.popStateListener.bind(this);
+  }
+
+  popStateListener(){
+    this.props.routerChange(document.location.pathname, false);
   }
 
   componentDidMount(){
     this.checkMatches();
+    window.addEventListener("popstate", this.popStateListener);
   }
 
   componentWillUnmount(){
-    this.unregister.forEach( (callback) => {
-      if ( typeof callback === "function" ){
-        callback();
-      }
-    } );
+    window.removeEventListener("popstate", this.popStateListener);
   }
 
   componentDidUpdate(){
@@ -59,7 +54,7 @@ class Router extends React.Component {
     (routePath || []).forEach( (pathPart, index) => {
       if ( index < currentPath.length ){
         if ( pathPart.match(/^:/) ){
-          match.params[ pathPart.replace(/^;/,'') ] = currentPath[index];
+          match.params[ pathPart.replace(/^:/,'') ] = currentPath[index];
           return;
         }
         else if ( pathPart === currentPath[index] ){
@@ -68,6 +63,9 @@ class Router extends React.Component {
       }
       match.isMatch = false;
     } );
+    if ( match.exact === true && match.isMatch ){
+      match.isMatch = currentPath.length === routePath.length;
+    }
     return match;
   }
 
@@ -89,9 +87,9 @@ class Router extends React.Component {
         match
       };
     } );
-    if ( JSON.stringify(this.state.match) !== JSON.stringify(matchFound) ){
-      this.setState({
-        match: matchFound
+    if ( JSON.stringify(this.props.router.match) !== JSON.stringify(matchFound) ){
+      this.props.routerUpdate({
+        match: Object.assign({}, matchFound)
       });
     }
   }
@@ -114,25 +112,12 @@ class Router extends React.Component {
   }
 
   getContext(){
-    let match = false;
-    this.routes.forEach( (entry) => {
-      if ( match !== false ){
-        return;
-      }
-      if ( entry.match.isMatch === true ){
-        match = entry.match;
-      }
-    } );
-    if ( match === false ){
-      match = {};
-    }
     return {
       router: {
         registerRoute: this.registerRoute.bind(this),
         canRender: this.canRender.bind(this),
         pushState: this.pushState.bind(this),
         ...this.props.router,
-        match
       }
     };
   }
@@ -147,8 +132,9 @@ class Router extends React.Component {
 }
 
 Router.propTypes = {
-  router: PropTypes.object,
-  routerChange: PropTypes.func,
+  router: PropTypes.object.isRequired,
+  routerChange: PropTypes.func.isRequired,
+  routerUpdate: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.elementType
@@ -157,5 +143,5 @@ Router.propTypes = {
 
 export default Connect({
   stateKeys: ["router"],
-  actions: ["routerChange"]
+  actions: ["routerChange", "routerUpdate"]
 })(Router);

@@ -14,12 +14,17 @@ export const field = (action, state = "N/A") => {
 
 export const router = (action, state = "N/A") => {
   if ( action.type === "@@router/change" ){
-    let newState = {
+    return {
       ...state,
       path: window.location.pathname,
       search: window.location.search
     };
-    return newState;
+  }
+  else if ( action.type === "@@router/update" ){
+    return {
+      ...state,
+      ...(action.payload || {})
+    };
   }
   return state;
 };

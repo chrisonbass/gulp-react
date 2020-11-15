@@ -5,7 +5,7 @@ import Route from './comps/Routing/Route';
 import Link from './comps/Routing/Link';
 import App from './comps/App';
 
-let BaseApp = (
+let Main = (
   <Router>
     <div className="container">
       <ul>
@@ -24,27 +24,21 @@ let BaseApp = (
             Contact
           </Link>
         </li>
+        <li>
+          <Link to="/contact/jim">
+            Contact w/Name
+          </Link>
+        </li>
       </ul>
     </div>
-    <Route path="/about" />
+    <Route path="/about" exact />
     <Route path="/home" component={App} />
-    <Route path="/contact" />
+    <Route path="/contact/:name" />
+    <Route path="/contact" exact />
   </Router>
 );
 
-window.onpopstate = function(event) {
-  console.log("location: " + document.location + ", state: " + JSON.stringify(event.state));
-};
-
-window.testPush = () => {
-  history.pushState({page: "home"}, "Home Page", "/home");
-};
-
-window.testPush2 = () => {
-  history.pushState({page: "about"}, "About Page", "/about");
-};
-
 ReactDOM.render(
-  BaseApp,
+  Main,
   document.getElementById("app")
 );

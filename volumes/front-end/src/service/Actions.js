@@ -12,7 +12,13 @@ export const toggleName = () => ({
   type: "toggle-name"
 });
 
-export const routerChange = (to) => ({
+export const routerChange = (to = document.location.pathname, pushState = true) => ({
   type: "@@router/change",
-  to
+  to,
+  pushState
+});
+
+export const routerUpdate = (payload) => ({
+  type: "@@router/update",
+  payload
 });

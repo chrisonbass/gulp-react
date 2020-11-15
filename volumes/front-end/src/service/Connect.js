@@ -18,10 +18,6 @@ export default ({
         this.state = {
           wrappedProps: this.processStore(store.getState(), false)
         };
-        this.deleteCallback;
-      }
-
-      componentDidMount(){
         this.deleteCallback = store.register(this.processStore.bind(this));
       }
 

@@ -3,7 +3,11 @@ import * as Reducers from './Reducers';
 import * as Middleware from './Middleware';
 
 let AppStore = new Store({
-  router: {},
+  router: {
+    path: window.location.pathname,
+    search: window.location.search,
+    match: {}
+  },
   name: "Ted",
   field: ""
 });
@@ -16,4 +20,5 @@ for ( let name in Middleware ){
   AppStore.registerMiddleware(Middleware[name]);
 } 
 
+window.store = AppStore;
 export default AppStore;
