@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import withRouter from './withRouter';
 
 class Route extends React.Component {
@@ -8,11 +9,12 @@ class Route extends React.Component {
   }
 
   render(){
-    if ( this.props.router.canRender(this) ){
-      if ( this.props.component ){
+    let { router, component, ...compProps } = this.props;
+    // eslint-disable-next-line no-unused-vars
+    let { canRender = () => false, registerRoute, ...routerState } = router;
+    if ( canRender(this) ){
+      if ( component ){
         let RouteComponent = this.props.component;
-        let { router, ...compProps } = this.props;
-        let { canRender, registerRoute, ...routerState } = router;
         return <RouteComponent {...routerState} {...compProps} />;
       }
       return (
@@ -25,5 +27,10 @@ class Route extends React.Component {
     return null;
   }
 }
+
+Route.propTypes = {
+  router: PropTypes.object.isRequired,
+  component: PropTypes.elementType,
+};
 
 export default withRouter(Route);

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import RouterContext from './Context';
 import Store from '../../service/Store';
 
@@ -35,6 +36,7 @@ class Router extends React.Component {
         }
         return next();
       } );
+      this.unregister.push(middleware);
       this.unregister.push(deleteCallback);
       this.unregister.push(stateUpdateCallback);
     }
@@ -171,7 +173,7 @@ class Router extends React.Component {
         ...this.state.router,
         match
       }
-    }
+    };
   }
 
   render(){
@@ -182,5 +184,13 @@ class Router extends React.Component {
     );
   }
 }
+
+Router.propTypes = {
+  store: PropTypes.object,
+  children: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.elementType
+  ])
+};
 
 export default Router;
