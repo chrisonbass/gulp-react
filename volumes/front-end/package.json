@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.17.20",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
@@ -20,6 +21,7 @@
     "@babel/preset-env": "^7.10.2",
     "@babel/preset-react": "^7.10.1",
     "@babel/register": "^7.10.1",
+    "babel-eslint": "^10.1.0",
     "babelify": "^10.0.0",
     "browserify": "^16.5.1",
     "eslint-plugin-react": "^7.21.5",
@@ -48,10 +50,18 @@
       "eslint:recommended",
       "plugin:react/recommended"
     ],
+    "parser": "babel-eslint",
     "parserOptions": {
+      "sourceType": "module",
       "ecmaFeatures": {
         "jsx": true
       }
+    },
+    "globals": {
+      "document": true,
+      "history": true,
+      "console": true,
+      "window": true
     },
     "rules": {
       "semi": [
