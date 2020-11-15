@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import RouterContext from './Context';
 
 class Link extends React.Component {
@@ -26,13 +27,14 @@ class Link extends React.Component {
   render(){
     let self = this;
     let {
-      onClick,
+      onClick = () => null,
       to,
       children,
       ...addProps
     } = this.props;
     let handleClick = (e) => {
       self.dispatch(e);
+      onClick(e);
     };
     return (
       <React.Fragment>
@@ -46,5 +48,14 @@ class Link extends React.Component {
     );
   }
 }
+
+Link.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.elementType
+  ]),
+  onClick: PropTypes.func,
+  to: PropTypes.string.isRequired
+};
 
 export default Link;
