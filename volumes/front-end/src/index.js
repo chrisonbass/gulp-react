@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
 import Store from './service/Store';
 import Router from './comps/Routing/Router';
 import Route from './comps/Routing/Route';
@@ -80,7 +80,7 @@ class MyApp extends React.Component {
               </button>
               <br />
               <button type="button" onClick={this.noAction.bind(this)}>
-                No Action 
+                No Action Test
               </button>
             </div>
           </div>
