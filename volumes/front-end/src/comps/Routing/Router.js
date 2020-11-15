@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RouterContext from './Context';
-import Store from '../../service/Store';
+import Connect from '../../service/Connect';
 
 class Router extends React.Component {
   constructor(props){
@@ -14,32 +14,6 @@ class Router extends React.Component {
       },
       match: {}
     };
-    this.unregister = [];
-    if ( this.props.store && this.props.store instanceof Store ){
-      let deleteCallback = this.props.store.registerReducer("router", (action, state = {}) => {
-        if ( action.type === "@@router/change" ){
-          let newState = {
-            ...state,
-            path: window.location.pathname,
-            search: window.location.search
-          };
-          return newState;
-        }
-        return state;
-      } );
-      let stateUpdateCallback = this.props.store.register(this.storeListener.bind(this));
-      let middleware = this.props.store.registerMiddleware( (store, action, next) => {
-        if ( action.type === "@@router/change" ){
-          window.history.pushState(action.state || {
-            to: action.to || "/"
-          }, action.title || "", action.to || "/");
-        }
-        return next();
-      } );
-      this.unregister.push(middleware);
-      this.unregister.push(deleteCallback);
-      this.unregister.push(stateUpdateCallback);
-    }
   }
 
   componentDidMount(){
@@ -56,14 +30,6 @@ class Router extends React.Component {
 
   componentDidUpdate(){
     this.checkMatches();
-  }
-
-  storeListener(state){
-    if ( this.state.router !== state.router ){
-      this.setState({
-        router: state.router
-      });
-    }
   }
 
   registerRoute(route){
@@ -144,12 +110,7 @@ class Router extends React.Component {
   }
 
   pushState(pathName){
-    if ( this.props.store ){
-      this.props.store.dispatch({
-        type: "@@router/change",
-        to: pathName
-      });
-    }
+    this.props.routerChange(pathName);
   }
 
   getContext(){
@@ -170,7 +131,7 @@ class Router extends React.Component {
         registerRoute: this.registerRoute.bind(this),
         canRender: this.canRender.bind(this),
         pushState: this.pushState.bind(this),
-        ...this.state.router,
+        ...this.props.router,
         match
       }
     };
@@ -186,11 +147,15 @@ class Router extends React.Component {
 }
 
 Router.propTypes = {
-  store: PropTypes.object,
+  router: PropTypes.object,
+  routerChange: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.elementType
   ])
 };
 
-export default Router;
+export default Connect({
+  stateKeys: ["router"],
+  actions: ["routerChange"]
+})(Router);
