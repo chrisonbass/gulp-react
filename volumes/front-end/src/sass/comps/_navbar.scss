@@ -1,0 +1,49 @@
+nav {
+  display: block;
+  &.navbar {
+    &.navbar-horizontal {
+      > div {
+        @include container;
+        @include borderBox;
+        > * {
+          @include borderBox;
+          display: inline-block;
+        }
+        > .brand {
+          @include rowCell;
+          font-weight: bold;
+        }
+
+        > ul {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+          > li {
+            display: inline-block;
+            margin-right: $gutter;
+            > a {
+              @include rowCell;
+              display: block;
+              padding-top: $baseline;
+              padding-bottom: $baseline;
+              color: $nav-link-text;
+              text-decoration: none;
+              background-color: $nav-link-bg;
+              .active,
+              &:hover,
+              &:focus,
+              &:active {
+                color: $nav-link-text-active;
+                background-color: $nav-link-bg-active;
+              }
+            }
+
+            &:last-child {
+              margin-right: 0px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

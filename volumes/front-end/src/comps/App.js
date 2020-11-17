@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Connect from '../service/Connect';
+import Connect from 'service/Connect';
 
 const App = (props) => {
   return (
     <div>
-      <h2>{props.name}</h2>
       <div className="container">
+        <h2>{props.name}</h2>
         <div className="row">
           <div className="col-xs-12">
             <input type="text" value={props.field} onChange={props.updateField} />

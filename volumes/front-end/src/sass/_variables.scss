@@ -1,6 +1,7 @@
 
 /* Grid Variables */
 $gutter: 15px !default;
+$baseline: ($gutter/2) !default;
 
 $screen-break-sm: 576px !default;
 $screen-break-md: 768px !default;
@@ -14,3 +15,10 @@ $container-width-xs: 540px !default;
 $container-width-sm: 720px !default; 	
 $container-width-md: 960px !default;
 $container-width-lg: 1140px !default; 		
+
+$text-color: #2b2b2b;
+
+$nav-link-bg: white;
+$nav-link-bg-active: #ebebff;
+$nav-link-text: $text-color;
+$nav-link-text-active: $text-color;

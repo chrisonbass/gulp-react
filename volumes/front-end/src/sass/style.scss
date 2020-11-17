@@ -2,11 +2,13 @@
 @import "./mixins";
 @import "./fonts";
 @import "./grid";
+@import "./comps/navbar";
 
 body {
   font-size: 12px;
   background: none;
   @include font-arial;
+  color: $text-color;
 }
 
 .clearfix {

@@ -18,7 +18,7 @@ class Route extends React.Component {
         return <RouteComponent {...routerState} {...compProps} />;
       }
       return (
-        <div>
+        <div className="container">
           <h1>Route</h1>
           <pre>Route {JSON.stringify(this.props, null, 2)}</pre>
         </div>
