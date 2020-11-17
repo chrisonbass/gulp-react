@@ -67,12 +67,20 @@ class Store {
     if ( !( key in this.reducers ) ){
       this.reducers[key] = [];
     }
+    if ( Array.isArray(callback) ){
+      this.reducers[key].concat(callback);
+      return _buildDeleteListener(this.reducers, callback.pop());
+    } 
     this.reducers[key].push(callback);
     return _buildDeleteListener(this.reducers, callback);
   }
 
   registerMiddleware(callback){
-    if ( this.middleware.indexOf(callback) < 0 ){
+    if ( Array.isArray(callback) ){
+      this.middleware.concat( callback.filter( c => this.middleware.indexOf(c) >= 0 ) );
+      return _buildDeleteListener(this.middleware, callback.pop);
+    }
+    else if ( this.middleware.indexOf(callback) < 0 ){
       this.middleware.push(callback);
     }
     return _buildDeleteListener(this.middleware, callback);
