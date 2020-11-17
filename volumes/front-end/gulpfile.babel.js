@@ -1,20 +1,20 @@
 "use strict";
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url';
 import gulp from "gulp";
-import path from 'path';
+// import path from 'path';
 import browserify from "browserify";
 import babelify from "babelify";
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
-import rename from 'gulp-rename';
+// import rename from 'gulp-rename';
 import clean from 'gulp-clean';
 import uglify from 'gulp-uglify';
 import sass from 'gulp-sass';
 import sourcemaps from 'gulp-sourcemaps';
 import noop from 'gulp-noop';
 
-const __filename = fileURLToPath(import.meta.url);
-const srcRoot = path.join(path.dirname(__filename));
+// const __filename = fileURLToPath(import.meta.url);
+// const srcRoot = path.join(path.dirname(__filename));
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -39,7 +39,12 @@ clearJsFile.displayName = "Clearing JS Files";
 
 /* ====== COMPILE JS SCRIPT ===== */
 let compileJavascript =  (done) => {
-  let builder = browserify('src/index.js', {debug: true})
+  let builder = browserify('src/index.js', {
+      debug: true,
+      paths: [
+        './src'
+      ]
+    })
     .transform(babelify, {
       presets: [
         "@babel/preset-env",
@@ -72,7 +77,7 @@ let compileJavascript =  (done) => {
 compileJavascript.displayName = "Compiling Javascript";
 
 /* ====== COMPILE SASS SCRIPT ===== */
-let compileSass =  (done) => {
+let compileSass =  () => {
   return gulp.src('./src/sass/style.scss')
     .pipe(sass.sync().on('error', sass.logError))
     .pipe(gulp.dest('./dist/css/'));
