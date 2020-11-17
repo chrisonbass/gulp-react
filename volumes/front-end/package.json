@@ -61,7 +61,8 @@
       "document": true,
       "history": true,
       "console": true,
-      "window": true
+      "window": true,
+      "process": true
     },
     "rules": {
       "semi": [
