@@ -28,3 +28,29 @@ export const router = (action, state = "N/A") => {
   }
   return state;
 };
+
+export const navbar = (action, state = {}) => {
+  if ( action.type === "app-load" ){
+    return {
+      links: [
+        {
+          to: "/home",
+          label: "Home"
+        },
+        {
+          to: "/about",
+          label: "About"
+        },
+        {
+          to: "/contact",
+          label: "Contact"
+        },
+        {
+          to: "/contact/jim",
+          label: "Jim"
+        }
+      ]
+    };
+  }
+  return state;
+};

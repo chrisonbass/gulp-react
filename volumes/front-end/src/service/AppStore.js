@@ -9,7 +9,8 @@ let AppStore = new Store({
     match: {}
   },
   name: "Ted",
-  field: ""
+  field: "",
+  navbar: {}
 });
 
 for ( let name in Reducers ){

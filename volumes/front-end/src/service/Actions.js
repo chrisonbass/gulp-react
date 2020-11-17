@@ -22,3 +22,7 @@ export const routerUpdate = (payload) => ({
   type: "@@router/update",
   payload
 });
+
+export const appLoad = () => ({
+  type: "app-load"
+});
