@@ -10,8 +10,6 @@ services:
     volumes:
       - ./volumes/gateway/confs:/etc/nginx/conf.d
       - ./volumes/front-end/dist:/www/data
-    depends_on:
-      - front-end
 
   front-end:
     image: node:latest

@@ -1,147 +1,101 @@
-import React from 'react';
+import React, { createContext, useEffect, useState } from 'react';
+import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
-import RouterContext from './Context';
-import Connect from '../../service/Connect';
 
-class Router extends React.Component {
-  constructor(props){
-    super(props);
-    this.routes = [];
-    this.popStateListener = this.popStateListener.bind(this);
-  }
+const initialRouterState = {
+  path: window.location.pathname,
+  search: window.location.search,
+  match: {}
+};
 
-  popStateListener(){
-    this.props.routerChange(document.location.pathname, false);
-  }
+export const Context = createContext(initialRouterState);
 
-  componentDidMount(){
-    this.checkMatches();
-    window.addEventListener("popstate", this.popStateListener);
-  }
-
-  componentWillUnmount(){
-    window.removeEventListener("popstate", this.popStateListener);
-  }
-
-  componentDidUpdate(){
-    this.checkMatches();
-  }
-
-  registerRoute(route){
-    let addNew = true;
-    this.routes.forEach( (entry) => {
-      if ( entry.route === route ){
-        addNew = false;
-      }
-    } );
-    if ( addNew === true ){
-      this.routes.push({
-        match: this.buildMatch(route),
-        route
-      });
-    }
-  }
-
-  buildMatch(route){
-    let match = {
-      path: route.props.path,
-      isMatch: true,
-      exact: route.props.exact ? true : false,
-      params: {}
-    };
-    let currentPath = ("" + window.location.pathname).trim().split(/\//).filter( str => str);
-    let routePath = ("" + match.path).trim().split(/\//).filter( str => str );
-    (routePath || []).forEach( (pathPart, index) => {
-      if ( index < currentPath.length ){
-        if ( pathPart.match(/^:/) ){
-          match.params[ pathPart.replace(/^:/,'') ] = currentPath[index];
-          return;
-        }
-        else if ( pathPart === currentPath[index] ){
-          return;
-        }
-      }
-      match.isMatch = false;
-    } );
-    if ( match.exact === true && match.isMatch ){
-      match.isMatch = currentPath.length === routePath.length;
-    }
-    return match;
-  }
-
-  checkMatches(){
-    let self = this;
-    let matchFound = false;
-    this.routes = this.routes.map( (entry) => {
-      let match = self.buildMatch(entry.route);
-      if ( match.isMatch === true ){
-        if ( matchFound !== false ){
-          match.isMatch = false;
-        }
-        else {
-          matchFound = match;
-        }
-      }
-      return {
-        route: entry.route,
-        match
-      };
-    } );
-    if ( JSON.stringify(this.props.router.match) !== JSON.stringify(matchFound) ){
-      this.props.routerUpdate({
-        match: Object.assign({}, matchFound)
-      });
-    }
-  }
-
-  canRender(route){
-    let can = false;
-    this.routes.forEach( (entry) => {
-      if ( can === true ){
+const buildMatch = (route) => {
+  let match = {
+    isMatch: true,
+    params: {},
+  };
+  let currentPath = ("" + window.location.pathname).trim().split(/\//).filter( str => str);
+  let routePath = ("" + route.path).trim().split(/\//).filter( str => str );
+  (routePath || []).forEach( (pathPart, index) => {
+    if ( index < currentPath.length ){
+      if ( pathPart.match(/^:/) ){
+        match.params[ pathPart.replace(/^:/,'') ] = currentPath[index];
         return;
       }
-      if ( entry.match.isMatch && entry.route === route ){
-        can = true;
+      else if ( ("" + pathPart).toLowerCase() === ("" + currentPath[index]).toLowerCase() ){
+        return;
       }
-    } );
-    return can;
+    }
+    match.isMatch = false;
+  } );
+  if ( route.exact === true && match.isMatch ){
+    match.isMatch = currentPath.length === routePath.length;
   }
+  return match;
+};
 
-  pushState(pathName){
-    this.props.routerChange(pathName);
-  }
+function Router(props){
+  const [router, updateRouter] = useState({...initialRouterState});
+  let mounted = false;
+  const popStateListener = () => {
+    updateRouter({
+      ...router,
+      path: window.location.pathname,
+      search: window.location.search
+    });
+  };
 
-  getContext(){
-    return {
-      router: {
-        registerRoute: this.registerRoute.bind(this),
-        canRender: this.canRender.bind(this),
-        pushState: this.pushState.bind(this),
-        ...this.props.router,
-      }
+  useEffect(() => {
+    if ( !mounted ){
+      window.addEventListener("popstate", popStateListener);
+      mounted = true;
+    }
+    return () => {
+      mounted = false;
+      window.removeEventListener("popstate", popStateListener);
     };
-  }
+  });
 
-  render(){
-    return (
-      <RouterContext.Provider value={this.getContext()}>
-        {this.props.children}
-      </RouterContext.Provider>
-    );
-  }
+  const contextValue = {
+    ...router,
+    push: (pathName) => {
+      if ( (window.history.state || {}).to !== pathName ){
+        window.history.pushState({to: pathName}, "", pathName);
+        let newState = {
+          ...router,
+          path: window.location.pathname,
+          search: window.location.search
+        };
+        updateRouter(newState);
+      }
+    },
+    canRender: (route) => {
+      return (buildMatch(route) || {}).isMatch === true;
+    },
+    registerRoute: (route) => {
+      let match = buildMatch(route);
+      if ( match.isMatch && !isEqual(router.match, match) ){
+        updateRouter({
+          ...router,
+          match
+        });
+      }
+    },
+    buildMatch
+  };
+  return (
+    <Context.Provider value={contextValue}>
+      {props.children}
+    </Context.Provider>
+  );
 }
 
 Router.propTypes = {
-  router: PropTypes.object.isRequired,
-  routerChange: PropTypes.func.isRequired,
-  routerUpdate: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.elementType
   ])
 };
 
-export default Connect({
-  stateKeys: ["router"],
-  actions: ["routerChange", "routerUpdate"]
-})(Router);
+export default Router;

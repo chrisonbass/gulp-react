@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Connect from 'service/Connect';
 import Link from 'comps/Routing/Link';
 
 const HorizontalNavbar = (props) => {
@@ -42,23 +41,25 @@ HorizontalNavbar.propTypes = {
     text: PropTypes.string
   }),
   links: PropTypes.arrayOf(
-    PropTypes.shape({
+    PropTypes.oneOfType([
+     PropTypes.shape({
       to: PropTypes.string.isRequired,
       label: PropTypes.oneOfType([
         PropTypes.node,
         PropTypes.element
       ])
+    }),
+    PropTypes.shape({
+      href: PropTypes.string.isRequired,
+      label: PropTypes.oneOfType([
+        PropTypes.node,
+        PropTypes.element
+      ])
     })
+   ])
   )
 };
 
-export default Connect({
-  stateKeys: [
-    'navbar.text',
-    'navbar.links'
-  ],
-  actions: [
-  ]
-})(HorizontalNavbar);
+export default HorizontalNavbar;
 
 

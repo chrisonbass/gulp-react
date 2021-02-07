@@ -1,61 +1,43 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import RouterContext from './Context';
+import {Context} from './Router';
 
-class Link extends React.Component {
-  constructor(props){
-    super(props);
-    this.dispatch = null;
-  }
-
-  consume(state){
-    if ( !this.dispatch ){
-      let self = this;
-      this.dispatch = (e) => {
-        if ( e && e.preventDefault ){
-          e.preventDefault();
-        }
-        state.router.pushState(self.props.to);
-        if ( self.props.onClick ){
-          self.props.onClick(e);
-        }
-      };
+function Link(props){
+  const {push} = useContext(Context);
+  let {
+    to,
+    href,
+    onClick,
+    ...addProps
+  } = props;        
+  const handleClick = (e) => {
+    if ( to && e && e.preventDefault ){
+      e.preventDefault();
+      push(to);
     }
-    return null;
-  }
-
-  render(){
-    let self = this;
-    let {
-      onClick = () => null,
-      to,
-      children,
-      ...addProps
-    } = this.props;
-    let handleClick = (e) => {
-      self.dispatch(e);
+    if ( onClick ){
       onClick(e);
-    };
-    return (
-      <React.Fragment>
-        <RouterContext.Consumer>
-          {this.consume.bind(this)}
-        </RouterContext.Consumer>
-        <a href={to} onClick={handleClick} {...addProps}>
-          {children}
-        </a>
-      </React.Fragment>
-    );
+    }
+  };
+  to = to || href;
+  if ( !to ){
+    to = "#";
   }
+  return (
+    <a href={to} onClick={handleClick} {...addProps}>
+      {props.children}
+    </a>
+  );
 }
 
 Link.propTypes = {
+  to: PropTypes.string,
+  href: PropTypes.string,
+  onClick: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.elementType
-  ]),
-  onClick: PropTypes.func,
-  to: PropTypes.string.isRequired
+  ])
 };
 
 export default Link;

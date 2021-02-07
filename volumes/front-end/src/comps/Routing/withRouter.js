@@ -1,16 +1,9 @@
-import React from 'react';
-import RouterContext from './Context';
+import React, { useContext } from 'react';
+import {Context} from './Router';
 
-const withRouter = ( ChildComponent ) => {
+export default function(ChildComponent){
   return function RouterWrapper(props){
-    return (
-      <RouterContext.Consumer>
-        {(state) => {
-          return <ChildComponent {...state} {...props} />;
-        }}
-      </RouterContext.Consumer>
-    );
+    let state = useContext(Context);
+    return <ChildComponent {...state} {...props} />;
   };
 }
-
-export default withRouter;

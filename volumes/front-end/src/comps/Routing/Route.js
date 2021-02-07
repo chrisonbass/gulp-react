@@ -1,36 +1,46 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { Context } from './Router';
 import PropTypes from 'prop-types';
-import withRouter from './withRouter';
 
-class Route extends React.Component {
-  constructor(props){
-    super(props);
-    props.router.registerRoute(this);
-  }
-
-  render(){
-    let { router, component, ...compProps } = this.props;
-    // eslint-disable-next-line no-unused-vars
-    let { canRender = () => false, registerRoute, ...routerState } = router;
-    if ( canRender(this) ){
-      if ( component ){
-        let RouteComponent = this.props.component;
-        return <RouteComponent {...routerState} {...compProps} />;
-      }
-      return (
-        <div className="container">
-          <h1>Route</h1>
-          <pre>Route {JSON.stringify(this.props, null, 2)}</pre>
-        </div>
-      );
+function Route(props){
+  const {
+    canRender,
+    buildMatch,
+    registerRoute,
+    ...routerState
+  } = useContext(Context);
+  useEffect( () => registerRoute(props) );
+  if ( canRender(props) ){
+    let RouteComponent = props.component;
+    let match = buildMatch(props);
+    if ( RouteComponent ){
+      return <RouteComponent {...routerState} match={match} {...props} />;
     }
-    return null;
+    return (
+      <div className="container">
+        <h1>Route</h1>
+        <div>
+          <pre>Route {JSON.stringify({...props, match}, null, 2)}</pre>
+        </div>     
+      </div>
+    );
   }
+  return null;
 }
 
-Route.propTypes = {
-  router: PropTypes.object.isRequired,
-  component: PropTypes.elementType,
+Route.defaultProps = {
+  exact: false,
+  path: "/",
+  component: null
 };
 
-export default withRouter(Route);
+Route.propTypes = {
+  exact: PropTypes.bool,
+  path: PropTypes.string,
+  component: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.elementType
+  ])
+};
+
+export default Route;

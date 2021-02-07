@@ -10,88 +10,90 @@ const _buildDeleteListener = (list, item) => {
   };
 };
 
-class Store {
-  constructor(defState = {}){
-    let self = this;
-    let _state = cloneDeep(defState);
+export default function createStore(defState){
+  let _state = cloneDeep(defState);
+  let listeners = [];
+  let reducers = {};
+  let middleware = [];
 
-    this.listeners = [];
-    this.reducers = {};
-    this.middleware = [];
-    this.getState = () => {
-      return _state;
-    };
+  const getState = () => {
+    return _state;
+  };
 
-    this.dispatch = (action) => {
-      let middlewareIndex = -1;
-      let middleware = this.middleware.slice();
-      let reducers = this.reducers;
-      let state = cloneDeep(_state);
-      const reduce = (store, action, dispatch) => {
-        Object.keys(state).forEach( (key) => {
-          if ( key in reducers ){
-            reducers[key].forEach( (reducer) => {
-              state[key] = reducer(action, state[key]);
-            } );
-          }
-        } );
-        return dispatch();
-      };
-      middleware.push(reduce);
-      const next = () => {
-        middlewareIndex++;
-        if ( middlewareIndex < middleware.length ){
-          let res = middleware[middlewareIndex](self, action, next);
-          if ( res !== next ){
-            throw new Error("Middleware must return the result from the next middleware");
-          }
-        }
-        return next;
-      };
-      next();
-      if ( !isEqual(_state, state) ){
-        _state = state;
-        self.makeCallbacks();
-      }
-    };
-  }
-
-  register(callback){
-    if ( this.listeners.indexOf(callback) < 0 ){
-      this.listeners.push(callback);
+  const subscribe = (callback) => {
+    if ( listeners.indexOf(callback) < 0 ){
+      listeners.push(callback);
     }
-    return _buildDeleteListener(this.listeners, callback);
-  }
+    return _buildDeleteListener(listeners, callback);
+  };
 
-  registerReducer(key, callback){
-    if ( !( key in this.reducers ) ){
-      this.reducers[key] = [];
+  const addReducer = (key, callback) => {
+    if ( !( key in reducers ) ){
+      reducers[key] = [];
     }
     if ( Array.isArray(callback) ){
-      this.reducers[key].concat(callback);
-      return _buildDeleteListener(this.reducers, callback.pop());
+      reducers[key].concat(callback);
+      return _buildDeleteListener(reducers[key], callback.slice().pop());
     } 
-    this.reducers[key].push(callback);
-    return _buildDeleteListener(this.reducers, callback);
-  }
+    reducers[key].push(callback);
+    return _buildDeleteListener(reducers[key], callback);
+  };
 
-  registerMiddleware(callback){
+  const addMiddleware = (callback) => {
     if ( Array.isArray(callback) ){
-      this.middleware.concat( callback.filter( c => this.middleware.indexOf(c) >= 0 ) );
-      return _buildDeleteListener(this.middleware, callback.pop);
+      middleware.concat( callback.filter( c => middleware.indexOf(c) >= 0 ) );
+      return _buildDeleteListener(middleware, callback.pop);
     }
-    else if ( this.middleware.indexOf(callback) < 0 ){
-      this.middleware.push(callback);
+    else if ( middleware.indexOf(callback) < 0 ){
+      middleware.push(callback);
     }
-    return _buildDeleteListener(this.middleware, callback);
-  }
+    return _buildDeleteListener(middleware, callback);
+  };
 
-  makeCallbacks(){
-    let state = this.getState();
-    this.listeners.forEach( (callback) => {
+  const makeCallbacks = () => {
+    let state = getState();
+    listeners.forEach( (callback) => {
       callback(state);
     } );
-  }
-}
+  };
 
-export default Store;
+  const dispatch = (action) => {
+    let middlewareIndex = -1;
+    let middle = middleware.slice();
+    let state = cloneDeep(getState());
+    const reduce = (store, action, dispatch) => {
+      Object.keys(state).forEach( (key) => {
+        if ( key in reducers ){
+          reducers[key].forEach( (reducer) => {
+            state[key] = reducer(action, state[key]);
+          } );
+        }
+      } );
+      return dispatch();
+    };
+    middle.push(reduce);
+    const next = () => {
+      middlewareIndex++;
+      if ( middlewareIndex < middle.length ){
+        let res = middle[middlewareIndex]({getState, dispatch}, action, next);
+        if ( res !== next ){
+          throw new Error("Middleware must return the result from the next middleware");
+        }
+      }
+      return next;
+    };
+    next();
+    if ( !isEqual(_state, state) ){
+      _state = state;
+      makeCallbacks();
+    }
+  };
+
+  return {
+    getState,
+    subscribe,
+    addMiddleware,
+    addReducer,
+    dispatch
+  };
+}
